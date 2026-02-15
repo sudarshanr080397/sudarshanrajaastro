@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudarshan Raja Astro — Daily Horoscope & Hindu Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c8963e;
+    --gold-light: #e8b96a;
+    --gold-pale: #f5dfa0;
+    --crimson: #8b1a1a;
+    --deep-navy: #06091a;
+    --midnight: #0b1030;
+    --indigo: #131840;
+    --slate: #1e2550;
+    --text-light: #f0e8d8;
+    --text-muted: #a89878;
+    --text-dim: #6a5a40;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--deep-navy);
+    color: var(--text-light);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Stars background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(100,80,200,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(180,100,50,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 10%, rgba(80,120,200,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #stars-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .wrapper { position: relative; z-index: 1; }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(180deg, rgba(6,5,20,0.98) 0%, rgba(11,16,48,0.95) 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 40px rgba(200,150,62,0.15);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 32px;
+    gap: 20px;
+  }
+
+  .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-emblem {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .logo-text h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    text-shadow: 0 0 20px rgba(200,150,62,0.4);
+  }
+
+  .logo-text p {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .header-date-block {
+    text-align: center;
+    flex: 1;
+  }
+
+  .sanskrit-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--gold-light);
+    margin-bottom: 2px;
+  }
+
+  .english-date {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--text-light);
+    font-style: italic;
+  }
+
+  .header-location {
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .header-location strong {
+    color: var(--gold-light);
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 2px;
+  }
+
+  nav {
+    border-top: 1px solid rgba(200,150,62,0.25);
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    background: rgba(11,16,48,0.6);
+    overflow-x: auto;
+  }
+
+  nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-right: 1px solid rgba(200,150,62,0.15);
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+
+  nav a:hover, nav a.active {
+    color: var(--gold);
+    background: rgba(200,150,62,0.08);
+  }
+
+  /* ─── LAYOUT ─── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr 280px;
+    gap: 0;
+    min-height: calc(100vh - 120px);
+  }
+
+  /* ─── SIDEBAR LEFT ─── */
+  .sidebar-left {
+    border-right: 1px solid rgba(200,150,62,0.2);
+    background: rgba(11,16,48,0.5);
+    padding: 20px 16px;
+  }
+
+  /* ─── CENTER CONTENT ─── */
+  .center-content {
+    padding: 24px 28px;
+  }
+
+  /* ─── SIDEBAR RIGHT ─── */
+  .sidebar-right {
+    border-left: 1px solid rgba(200,150,62,0.2);
+    background: rgba(11,16,48,0.5);
+    padding: 20px 16px;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid rgba(200,150,62,0.3);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::before {
+    content: '✦';
+    font-size: 0.6rem;
+    opacity: 0.7;
+  }
+
+  /* ─── PANCHANG CARD ─── */
+  .panchang-card {
+    background: linear-gradient(135deg, rgba(30,37,80,0.7) 0%, rgba(11,16,48,0.7) 100%);
+    border: 1px solid rgba(200,150,62,0.3);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .panchang-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .panchang-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
+    background: rgba(6,9,26,0.5);
+    border-radius: 3px;
+    border-left: 2px solid var(--gold);
+  }
+
+  .panchang-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .panchang-value {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+
+  .panchang-sub {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ─── SUN / MOON TIMES ─── */
+  .astro-times {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .astro-time-item {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+    border: 1px solid rgba(200,150,62,0.2);
+    border-radius: 4px;
+    background: rgba(6,9,26,0.5);
+  }
+
+  .astro-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+
+  .astro-time-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .astro-time-val {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+
+  /* ─── MUHURTA TABLE ─── */
+  .muhurta-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .muhurta-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 3px;
+    font-size: 0.82rem;
+    border: 1px solid transparent;
+  }
+
+  .muhurta-item.good {
+    background: rgba(0,80,40,0.25);
+    border-color: rgba(0,150,80,0.25);
+  }
+
+  .muhurta-item.bad {
+    background: rgba(80,0,0,0.25);
+    border-color: rgba(150,0,0,0.25);
+  }
+
+  .muhurta-item.neutral {
+    background: rgba(30,37,80,0.4);
+    border-color: rgba(100,120,200,0.2);
+  }
+
+  .muhurta-name { font-family: 'Cinzel', serif; font-size: 0.7rem; }
+  .muhurta-time { color: var(--text-muted); font-size: 0.8rem; }
+  .muhurta-badge {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+  }
+
+  .muhurta-badge.good { background: rgba(0,150,80,0.3); color: #4df0a0; }
+  .muhurta-badge.bad { background: rgba(150,0,0,0.3); color: #f04d4d; }
+
+  /* ─── RAHU KAAL SPECIAL ─── */
+  .rahu-card {
+    background: rgba(80,0,0,0.2);
+    border: 1px solid rgba(200,50,50,0.3);
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .rahu-icon { font-size: 1.8rem; }
+
+  .rahu-info .rahu-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #f04d4d;
+    text-transform: uppercase;
+  }
+
+  .rahu-info .rahu-time {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    color: var(--text-light);
+    font-weight: 700;
+  }
+
+  /* ─── HOROSCOPE GRID ─── */
+  .horoscope-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid rgba(200,150,62,0.3);
+    margin-bottom: 24px;
+  }
+
+  .horoscope-tabs button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+
+  .horoscope-tabs button:hover {
+    color: var(--gold-light);
+  }
+
+  .horoscope-tabs button.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(200,150,62,0.08);
+  }
+
+  /* ─── ZODIAC WHEEL ─── */
+  .zodiac-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .zodiac-card {
+    background: linear-gradient(135deg, rgba(19,24,64,0.8) 0%, rgba(11,16,48,0.8) 100%);
+    border: 1px solid rgba(200,150,62,0.2);
+    border-radius: 6px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .zodiac-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,150,62,0.12) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .zodiac-card:hover, .zodiac-card.selected {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(200,150,62,0.2);
+  }
+
+  .zodiac-card:hover::before, .zodiac-card.selected::before {
+    opacity: 1;
+  }
+
+  .zodiac-symbol {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .zodiac-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold-light);
+    text-transform: uppercase;
+  }
+
+  .zodiac-dates {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .zodiac-element {
+    font-size: 0.6rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  .fire { background: rgba(220,80,30,0.2); color: #f08050; border: 1px solid rgba(220,80,30,0.3); }
+  .earth { background: rgba(80,160,50,0.2); color: #80c060; border: 1px solid rgba(80,160,50,0.3); }
+  .air { background: rgba(80,160,220,0.2); color: #80c0f0; border: 1px solid rgba(80,160,220,0.3); }
+  .water { background: rgba(50,80,220,0.2); color: #8090f0; border: 1px solid rgba(50,80,220,0.3); }
+
+  /* ─── HOROSCOPE DETAIL ─── */
+  .horoscope-detail {
+    background: linear-gradient(135deg, rgba(19,24,64,0.9) 0%, rgba(11,16,48,0.9) 100%);
+    border: 1px solid rgba(200,150,62,0.35);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .horoscope-detail::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,150,62,0.08) 0%, transparent 70%);
+  }
+
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(200,150,62,0.2);
+  }
+
+  .detail-symbol {
+    font-size: 4rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(200,150,62,0.4));
+  }
+
+  .detail-info h2 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  .detail-info .rashi-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+  }
+
+  .detail-info .lord-planet {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .score-bars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .score-bar-item { text-align: center; }
+
+  .score-bar-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .score-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid rgba(200,150,62,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    position: relative;
+  }
+
+  .horoscope-text p {
+    margin-bottom: 12px;
+    line-height: 1.8;
+    color: var(--text-light);
+    font-size: 1rem;
+  }
+
+  .lucky-items {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(200,150,62,0.15);
+    flex-wrap: wrap;
+  }
+
+  .lucky-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .lucky-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .lucky-value {
+    font-size: 0.95rem;
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+
+  /* ─── PLANET POSITIONS ─── */
+  .planet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .planet-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(200,150,62,0.3);
+  }
+
+  .planet-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(200,150,62,0.1);
+    vertical-align: middle;
+  }
+
+  .planet-table tr:hover td {
+    background: rgba(200,150,62,0.05);
+  }
+
+  .planet-icon { font-size: 1.1rem; margin-right: 6px; }
+
+  .planet-name { font-family: 'Cinzel', serif; font-size: 0.75rem; }
+
+  .planet-rashi { color: var(--gold-light); }
+
+  .planet-retro {
+    display: inline-block;
+    font-size: 0.6rem;
+    background: rgba(150,50,50,0.3);
+    color: #f08080;
+    border: 1px solid rgba(150,50,50,0.4);
+    border-radius: 2px;
+    padding: 1px 5px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── CALENDAR ─── */
+  .mini-calendar { margin-bottom: 16px; }
+
+  .cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .cal-header h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    color: var(--gold-light);
+  }
+
+  .cal-nav {
+    background: none;
+    border: 1px solid rgba(200,150,62,0.3);
+    color: var(--gold);
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .cal-nav:hover { background: rgba(200,150,62,0.15); }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+  }
+
+  .cal-day-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 4px 2px;
+    text-transform: uppercase;
+  }
+
+  .cal-day {
+    padding: 5px 2px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .cal-day:hover { background: rgba(200,150,62,0.15); color: var(--gold); }
+
+  .cal-day.today {
+    background: var(--gold);
+    color: var(--deep-navy);
+    font-weight: 700;
+    border-radius: 50%;
+    font-family: 'Cinzel', serif;
+  }
+
+  .cal-day.other-month { color: var(--text-dim); }
+
+  .cal-day.festival::after {
+    content: '·';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--gold);
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+
+  /* ─── FESTIVALS ─── */
+  .festival-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .festival-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px;
+    background: rgba(19,24,64,0.5);
+    border-radius: 3px;
+    border-left: 2px solid var(--gold);
+    font-size: 0.82rem;
+  }
+
+  .festival-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--gold);
+    min-width: 30px;
+    text-align: center;
+    padding-top: 1px;
+  }
+
+  .festival-name { color: var(--text-light); }
+
+  /* ─── VEDIC CHART ─── */
+  .vedic-chart-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  /* ─── TABS PANEL ─── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid rgba(200,150,62,0.2);
+    padding: 24px 32px;
+    text-align: center;
+    background: rgba(6,9,26,0.8);
+  }
+
+  footer .footer-mantra {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  footer p {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ─── DIVIDER ─── */
+  .ornate-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 16px;
+  }
+
+  .ornate-divider::before,
+  .ornate-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,150,62,0.4), transparent);
+  }
+
+  .ornate-divider span {
+    color: var(--gold);
+    font-size: 0.9rem;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1100px) {
+    .main-grid { grid-template-columns: 260px 1fr; }
+    .sidebar-right { display: none; }
+    .zodiac-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .sidebar-left { border-right: none; border-bottom: 1px solid rgba(200,150,62,0.2); }
+    .header-top { flex-wrap: wrap; }
+    .zodiac-grid { grid-template-columns: repeat(2, 1fr); }
+    .score-bars { grid-template-columns: repeat(3, 1fr); }
+    .center-content { padding: 16px; }
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .fade-in {
+    animation: fadeInUp 0.5s ease both;
+  }
+
+  .gold-shimmer {
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-pale) 50%, var(--gold) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+
+  .tooltip {
+    position: relative;
+    cursor: help;
+  }
+
+  .tooltip:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--indigo);
+    border: 1px solid rgba(200,150,62,0.3);
+    color: var(--text-light);
+    font-size: 0.72rem;
+    padding: 5px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    z-index: 10;
+  }
+
+  /* ─── VRAT LIST ─── */
+  .vrat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(200,150,62,0.1);
+    font-size: 0.83rem;
+  }
+
+  .vrat-item:last-child { border-bottom: none; }
+
+  .vrat-icon { margin-right: 6px; }
+
+  /* ─── HORA TABLE ─── */
+  .hora-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+
+  .hora-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(200,150,62,0.3);
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .hora-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid rgba(200,150,62,0.07);
+  }
+
+  .hora-table tr.current-hora td {
+    background: rgba(200,150,62,0.15);
+    color: var(--gold-light);
+  }
+
+  /* ─── NAKSHATRA BAR ─── */
+  .nak-bar {
+    background: rgba(19,24,64,0.6);
+    border: 1px solid rgba(200,150,62,0.2);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nak-icon { font-size: 1.6rem; }
+
+  .nak-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+    margin-bottom: 2px;
+  }
+
+  .nak-desc { font-size: 0.78rem; color: var(--text-muted); font-style: italic; }
+
+  /* ─── WIDGET ─── */
+  .widget {
+    background: linear-gradient(135deg, rgba(30,37,80,0.6) 0%, rgba(11,16,48,0.6) 100%);
+    border: 1px solid rgba(200,150,62,0.2);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Loading state */
+  .loading { opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div class="wrapper">
+
+<!-- ═══════ HEADER ═══════ -->
+<header>
+  <div class="header-top">
+    <div class="logo-block">
+      <svg class="logo-emblem" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="28" r="26" stroke="#c8963e" stroke-width="1.5" fill="none" opacity="0.6"/>
+        <circle cx="28" cy="28" r="20" stroke="#c8963e" stroke-width="0.8" fill="none" opacity="0.4"/>
+        <polygon points="28,5 32,22 48,22 35,33 40,50 28,40 16,50 21,33 8,22 24,22" fill="none" stroke="#c8963e" stroke-width="1.2" opacity="0.7"/>
+        <circle cx="28" cy="28" r="5" fill="#c8963e" opacity="0.8"/>
+        <text x="28" y="32" text-anchor="middle" fill="#c8963e" font-size="8" font-family="serif" opacity="0.9">ॐ</text>
+      </svg>
+      <div class="logo-text">
+        <h1>Sudarshan Raja Astro</h1>
+        <p>Hindu Calendar & Vedic Astrology</p>
+      </div>
+    </div>
+    <div class="header-date-block">
+      <div class="sanskrit-date" id="hindu-date-header">Māgha Māsa, Shukla Paksha</div>
+      <div class="english-date" id="english-date-header">Loading...</div>
+    </div>
+    <div class="header-location">
+      <strong>📍 Location</strong>
+      <span id="location-display">Chennai, Tamil Nadu</span>
+    </div>
+  </div>
+  <nav>
+    <a href="#" class="active" onclick="showTab('panchang', this)">Panchang</a>
+    <a href="#" onclick="showTab('horoscope', this)">Horoscope</a>
+    <a href="#" onclick="showTab('muhurta', this)">Muhurta</a>
+    <a href="#" onclick="showTab('planets', this)">Planets</a>
+    <a href="#" onclick="showTab('festivals', this)">Festivals</a>
+    <a href="#" onclick="showTab('nakshatra', this)">Nakshatra</a>
+    <a href="#" onclick="showTab('hora', this)">Hora</a>
+    <a href="#" onclick="showTab('kundli', this)">Kundli</a>
+  </nav>
+</header>
+
+<!-- ═══════ MAIN GRID ═══════ -->
+<div class="main-grid">
+
+  <!-- ─── SIDEBAR LEFT ─── -->
+  <aside class="sidebar-left">
+    <div class="section-title">Today's Panchang</div>
+
+    <div class="astro-times">
+      <div class="astro-time-item">
+        <span class="astro-icon">🌅</span>
+        <div class="astro-time-label">Sunrise</div>
+        <div class="astro-time-val" id="sunrise">6:25 AM</div>
+      </div>
+      <div class="astro-time-item">
+        <span class="astro-icon">🌇</span>
+        <div class="astro-time-label">Sunset</div>
+        <div class="astro-time-val" id="sunset">6:09 PM</div>
+      </div>
+      <div class="astro-time-item">
+        <span class="astro-icon">🌙</span>
+        <div class="astro-time-label">Moonrise</div>
+        <div class="astro-time-val" id="moonrise">—</div>
+      </div>
+    </div>
+
+    <div class="panchang-card">
+      <div class="panchang-grid">
+        <div class="panchang-item tooltip" data-tip="Lunar day">
+          <span class="panchang-label">Tithi</span>
+          <span class="panchang-value" id="tithi">Dwadashi</span>
+          <span class="panchang-sub" id="tithi-end">ends 4:38 PM</span>
+        </div>
+        <div class="panchang-item tooltip" data-tip="Lunar asterism">
+          <span class="panchang-label">Nakshatra</span>
+          <span class="panchang-value" id="nakshatra">Ashlesha</span>
+          <span class="panchang-sub" id="nak-end">ends 7:45 PM</span>
+        </div>
+        <div class="panchang-item tooltip" data-tip="Auspicious yoga">
+          <span class="panchang-label">Yoga</span>
+          <span class="panchang-value" id="yoga">Siddhi</span>
+          <span class="panchang-sub" id="yoga-end">ends 11:22 AM</span>
+        </div>
+        <div class="panchang-item tooltip" data-tip="Half lunar day">
+          <span class="panchang-label">Karana</span>
+          <span class="panchang-value" id="karana">Vishti</span>
+          <span class="panchang-sub" id="karana-end">ends 4:38 PM</span>
+        </div>
+        <div class="panchang-item">
+          <span class="panchang-label">Vara (Day)</span>
+          <span class="panchang-value" id="vara">Ravivara</span>
+          <span class="panchang-sub">Sunday</span>
+        </div>
+        <div class="panchang-item">
+          <span class="panchang-label">Paksha</span>
+          <span class="panchang-value" id="paksha">Shukla</span>
+          <span class="panchang-sub">Waxing Moon</span>
+        </div>
+        <div class="panchang-item">
+          <span class="panchang-label">Masa (Month)</span>
+          <span class="panchang-value" id="masa">Māgha</span>
+          <span class="panchang-sub" id="samvat">Vikram 2082</span>
+        </div>
+        <div class="panchang-item">
+          <span class="panchang-label">Ayana</span>
+          <span class="panchang-value">Uttarāyaṇa</span>
+          <span class="panchang-sub">Northern course</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rahu Kaal -->
+    <div class="rahu-card">
+      <span class="rahu-icon">🐍</span>
+      <div class="rahu-info">
+        <div class="rahu-label">⚠ Rahu Kaal</div>
+        <div class="rahu-time" id="rahu-kaal">4:48 PM – 6:09 PM</div>
+        <div style="font-size:0.72rem; color: var(--text-dim); margin-top:2px;">Avoid auspicious works</div>
+      </div>
+    </div>
+
+    <!-- Gulika & Yamaganda -->
+    <div class="panchang-card">
+      <div class="panchang-grid">
+        <div class="panchang-item">
+          <span class="panchang-label">Gulika Kaal</span>
+          <span class="panchang-value" id="gulika" style="font-size:0.82rem;">1:43 PM–3:05 PM</span>
+        </div>
+        <div class="panchang-item">
+          <span class="panchang-label">Yamaganda</span>
+          <span class="panchang-value" id="yamag" style="font-size:0.82rem;">12:21 PM–1:43 PM</span>
+        </div>
+        <div class="panchang-item">
+          <span class="panchang-label">Abhijit</span>
+          <span class="panchang-value" id="abhijit" style="font-size:0.82rem;">12:00 PM–12:48 PM</span>
+          <span class="panchang-sub" style="color:#4df0a0">✦ Auspicious</span>
+        </div>
+        <div class="panchang-item">
+          <span class="panchang-label">Dur Muhurta</span>
+          <span class="panchang-value" id="dur-muh" style="font-size:0.82rem;">4:27 PM–5:18 PM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Moon Phase -->
+    <div class="widget">
+      <div class="section-title" style="margin-top:0">Moon Phase</div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div id="moon-phase-icon" style="font-size:3rem; line-height:1; text-align:center; min-width:50px;">🌔</div>
+        <div>
+          <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold-light);" id="moon-phase-name">Waxing Gibbous</div>
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">Shukla Paksha — Dwadashi</div>
+          <div style="font-size:0.78rem; color:var(--text-dim); font-style:italic; margin-top:2px;" id="moon-illumination">Illumination: 82%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lagna -->
+    <div class="widget">
+      <div class="section-title" style="margin-top:0">Current Lagna</div>
+      <div id="lagna-display" style="font-family:'Cinzel',serif; font-size:0.9rem; color:var(--gold-light); margin-bottom:4px;">Mithuna (Gemini)</div>
+      <div style="font-size:0.78rem; color:var(--text-muted);">Rising sign changes ~every 2 hours</div>
+      <div style="font-size:0.78rem; color:var(--text-dim); margin-top:4px;" id="lagna-time">Lagna changes at 2:17 PM</div>
+    </div>
+
+  </aside>
+
+  <!-- ─── CENTER CONTENT ─── -->
+  <main class="center-content">
+
+    <!-- Panchang Tab -->
+    <div id="tab-panchang" class="tab-panel active">
+      <div class="ornate-divider"><span>✦ ॐ ✦</span></div>
+
+      <div style="text-align:center; margin-bottom:24px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.6rem; margin-bottom:6px;">Sudarshan Raja Astro</h2>
+        <p style="color:var(--text-muted); font-style:italic;" id="full-date-display">Sunday, February 15, 2026 · Chennai, Tamil Nadu</p>
+      </div>
+
+      <!-- Choghadiya -->
+      <div class="section-title">Choghadiya (Auspicious Periods)</div>
+      <div class="widget" style="padding:0; overflow:hidden;">
+        <div id="choghadiya-day" style="padding:12px 16px; border-bottom:1px solid rgba(200,150,62,0.15);">
+          <div style="font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; color:var(--gold); margin-bottom:10px;">▲ DAY CHOGHADIYA</div>
+          <div id="choghadiya-day-content" style="display:grid; grid-template-columns: repeat(4,1fr); gap:8px;"></div>
+        </div>
+        <div style="padding:12px 16px;">
+          <div style="font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; color:var(--gold); margin-bottom:10px;">▼ NIGHT CHOGHADIYA</div>
+          <div id="choghadiya-night-content" style="display:grid; grid-template-columns: repeat(4,1fr); gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Hindu Calendar Details -->
+      <div class="ornate-divider"><span>❋</span></div>
+      <div class="section-title">Vedic Calendar Details</div>
+      <div class="panchang-card">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <div class="panchang-item" style="margin-bottom:8px;">
+              <span class="panchang-label">Vikram Samvat</span>
+              <span class="panchang-value">2082</span>
+            </div>
+            <div class="panchang-item" style="margin-bottom:8px;">
+              <span class="panchang-label">Shaka Samvat</span>
+              <span class="panchang-value">1947</span>
+            </div>
+            <div class="panchang-item">
+              <span class="panchang-label">Kali Yuga Year</span>
+              <span class="panchang-value">5127</span>
+            </div>
+          </div>
+          <div>
+            <div class="panchang-item" style="margin-bottom:8px;">
+              <span class="panchang-label">Saka Year</span>
+              <span class="panchang-value">Shobhana</span>
+            </div>
+            <div class="panchang-item" style="margin-bottom:8px;">
+              <span class="panchang-label">Ritu (Season)</span>
+              <span class="panchang-value">Shishir</span>
+              <span class="panchang-sub">Winter season</span>
+            </div>
+            <div class="panchang-item">
+              <span class="panchang-label">Disha Shool</span>
+              <span class="panchang-value">West</span>
+              <span class="panchang-sub">Avoid travel west</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Vratas -->
+      <div class="ornate-divider"><span>❋</span></div>
+      <div class="section-title">Vratas & Festivals Today</div>
+      <div class="widget">
+        <div class="vrat-item">
+          <span><span class="vrat-icon">🪔</span> Pradosh Vrat</span>
+          <span style="color:var(--gold-light); font-family:'Cinzel',serif; font-size:0.75rem;">Shiva Worship Day</span>
+        </div>
+        <div class="vrat-item">
+          <span><span class="vrat-icon">🌸</span> Magha Masa Dwadashi</span>
+          <span style="color:var(--text-muted); font-size:0.8rem;">Auspicious</span>
+        </div>
+        <div class="vrat-item">
+          <span><span class="vrat-icon">⭐</span> Bhaumi Pradosh</span>
+          <span style="color:var(--gold-light); font-family:'Cinzel',serif; font-size:0.75rem;">Special Observance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Horoscope Tab -->
+    <div id="tab-horoscope" class="tab-panel">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.5rem; margin-bottom:6px;">Daily Horoscope</h2>
+        <p style="color:var(--text-muted); font-style:italic;">Select your zodiac sign for today's reading</p>
+      </div>
+
+      <div class="horoscope-tabs" id="period-tabs">
+        <button class="active" onclick="setPeriod('today', this)">Today</button>
+        <button onclick="setPeriod('tomorrow', this)">Tomorrow</button>
+        <button onclick="setPeriod('week', this)">This Week</button>
+        <button onclick="setPeriod('month', this)">This Month</button>
+        <button onclick="setPeriod('year', this)">2026</button>
+      </div>
+
+      <div class="zodiac-grid" id="zodiac-grid"></div>
+
+      <div class="horoscope-detail fade-in" id="horoscope-detail">
+        <div class="detail-header">
+          <div class="detail-symbol" id="detail-symbol">♈</div>
+          <div class="detail-info">
+            <h2 id="detail-name">Aries</h2>
+            <div class="rashi-name" id="detail-rashi">MESHA RASHI · FIRE SIGN · RULED BY MARS</div>
+            <div class="lord-planet" id="detail-dates">March 21 – April 19</div>
+          </div>
+        </div>
+
+        <div class="score-bars">
+          <div class="score-bar-item">
+            <div class="score-bar-label">Love & Relations</div>
+            <div class="score-ring" id="score-love" style="border-color:rgba(220,80,120,0.5); color:#f090c0;">8</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">Excellent</div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label">Career & Finance</div>
+            <div class="score-ring" id="score-career" style="border-color:rgba(200,150,62,0.5); color:var(--gold-light);">7</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">Very Good</div>
+          </div>
+          <div class="score-bar-item">
+            <div class="score-bar-label">Health & Vitality</div>
+            <div class="score-ring" id="score-health" style="border-color:rgba(80,200,120,0.5); color:#80f0a0;">6</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">Good</div>
+          </div>
+        </div>
+
+        <div class="horoscope-text" id="horoscope-text">
+          <p>The celestial alignment today brings powerful energies for transformation and new beginnings. Mars, your ruling planet, forms a favorable trine with Jupiter, amplifying your natural vitality and courage.</p>
+          <p>In matters of the heart, Venus casts a gentle glow upon your relationships. Long-standing bonds are strengthened, and those seeking new connections may find a promising encounter in familiar settings.</p>
+          <p>Professionally, your analytical skills are sharp and your communication clear. A project that has been stagnant may suddenly find momentum. Trust your instincts in financial matters, but avoid impulsive investments.</p>
+        </div>
+
+        <div class="lucky-items">
+          <div class="lucky-item">
+            <span class="lucky-label">Lucky Number</span>
+            <span class="lucky-value" id="lucky-num">3 · 9</span>
+          </div>
+          <div class="lucky-item">
+            <span class="lucky-label">Lucky Color</span>
+            <span class="lucky-value" id="lucky-color">🔴 Red · Orange</span>
+          </div>
+          <div class="lucky-item">
+            <span class="lucky-label">Lucky Gem</span>
+            <span class="lucky-value" id="lucky-gem">Ruby · Red Coral</span>
+          </div>
+          <div class="lucky-item">
+            <span class="lucky-label">Compatible Signs</span>
+            <span class="lucky-value" id="lucky-compat">Leo · Sagittarius</span>
+          </div>
+          <div class="lucky-item">
+            <span class="lucky-label">Best Time</span>
+            <span class="lucky-value" id="lucky-time">10 AM – 1 PM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Muhurta Tab -->
+    <div id="tab-muhurta" class="tab-panel">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.5rem; margin-bottom:6px;">Auspicious Muhurta</h2>
+        <p style="color:var(--text-muted); font-style:italic;">Favorable timings for important activities today</p>
+      </div>
+      <div class="muhurta-list" id="muhurta-list"></div>
+    </div>
+
+    <!-- Planets Tab -->
+    <div id="tab-planets" class="tab-panel">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.5rem; margin-bottom:6px;">Planetary Positions</h2>
+        <p style="color:var(--text-muted); font-style:italic;">Graha Sthiti — February 15, 2026</p>
+      </div>
+      <div class="widget">
+        <table class="planet-table" id="planet-table">
+          <thead>
+            <tr>
+              <th>Graha (Planet)</th>
+              <th>Rashi (Sign)</th>
+              <th>Degree</th>
+              <th>Nakshatra</th>
+              <th>Status</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody id="planet-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Festivals Tab -->
+    <div id="tab-festivals" class="tab-panel">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.5rem; margin-bottom:6px;">Festivals & Vrats</h2>
+        <p style="color:var(--text-muted); font-style:italic;">February 2026 · Māgha Māsa</p>
+      </div>
+      <div class="festival-list" id="festival-list"></div>
+    </div>
+
+    <!-- Nakshatra Tab -->
+    <div id="tab-nakshatra" class="tab-panel">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.5rem; margin-bottom:6px;">Nakshatra Details</h2>
+        <p style="color:var(--text-muted); font-style:italic;">27 Lunar Mansions — Today's Position: Ashlesha</p>
+      </div>
+      <div id="nakshatra-list" class="widget">
+        <div id="nakshatra-today" style="margin-bottom:16px;"></div>
+        <div class="section-title">All 27 Nakshatras</div>
+        <div id="all-nakshatras" style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;"></div>
+      </div>
+    </div>
+
+    <!-- Hora Tab -->
+    <div id="tab-hora" class="tab-panel">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.5rem; margin-bottom:6px;">Hora Chart</h2>
+        <p style="color:var(--text-muted); font-style:italic;">Planetary hours for Sunday, February 15, 2026</p>
+      </div>
+      <div class="widget">
+        <table class="hora-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Planet (Hora)</th>
+              <th>Good For</th>
+              <th>Avoid</th>
+            </tr>
+          </thead>
+          <tbody id="hora-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Kundli Tab -->
+    <div id="tab-kundli" class="tab-panel">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 class="gold-shimmer" style="font-family:'Cinzel Decorative',serif; font-size:1.5rem; margin-bottom:6px;">Kundli Generator</h2>
+        <p style="color:var(--text-muted); font-style:italic;">Generate your Vedic birth chart</p>
+      </div>
+      <div class="widget">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:20px;">
+          <div>
+            <label style="display:block; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">Date of Birth</label>
+            <input type="date" id="kundli-dob" style="width:100%; background:rgba(6,9,26,0.8); border:1px solid rgba(200,150,62,0.3); border-radius:3px; color:var(--text-light); padding:8px 10px; font-family:'EB Garamond',serif; font-size:0.9rem; outline:none;">
+          </div>
+          <div>
+            <label style="display:block; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">Time of Birth</label>
+            <input type="time" id="kundli-tob" style="width:100%; background:rgba(6,9,26,0.8); border:1px solid rgba(200,150,62,0.3); border-radius:3px; color:var(--text-light); padding:8px 10px; font-family:'EB Garamond',serif; font-size:0.9rem; outline:none;">
+          </div>
+          <div>
+            <label style="display:block; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase;">Place of Birth</label>
+            <input type="text" id="kundli-pob" placeholder="City, Country" style="width:100%; background:rgba(6,9,26,0.8); border:1px solid rgba(200,150,62,0.3); border-radius:3px; color:var(--text-light); padding:8px 10px; font-family:'EB Garamond',serif; font-size:0.9rem; outline:none; caret-color:var(--gold);">
+          </div>
+        </div>
+        <div style="text-align:center; margin-bottom:24px;">
+          <button onclick="generateKundli()" style="background:linear-gradient(135deg,#c8963e,#8b6020); border:none; border-radius:3px; color:var(--deep-navy); font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:0.2em; text-transform:uppercase; padding:12px 32px; cursor:pointer; font-weight:700; transition:all 0.2s; box-shadow:0 4px 20px rgba(200,150,62,0.25);">Generate Kundli ✦</button>
+        </div>
+        <div id="kundli-chart" style="display:none;">
+          <div class="section-title">Birth Chart (Lagna Kundli)</div>
+          <div style="display:flex; justify-content:center; margin-bottom:20px;">
+            <canvas id="kundli-canvas" width="400" height="400"></canvas>
+          </div>
+          <div id="kundli-details"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── SIDEBAR RIGHT ─── -->
+  <aside class="sidebar-right">
+
+    <!-- Mini Calendar -->
+    <div class="section-title">February 2026</div>
+    <div class="mini-calendar">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+        <h3 id="cal-month-label">February 2026</h3>
+        <button class="cal-nav" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calendar-grid">
+        <div class="cal-day-header">Su</div>
+        <div class="cal-day-header">Mo</div>
+        <div class="cal-day-header">Tu</div>
+        <div class="cal-day-header">We</div>
+        <div class="cal-day-header">Th</div>
+        <div class="cal-day-header">Fr</div>
+        <div class="cal-day-header">Sa</div>
+      </div>
+    </div>
+
+    <div class="ornate-divider"><span>✦</span></div>
+
+    <!-- Today's Nakshatra -->
+    <div class="section-title">Today's Nakshatra</div>
+    <div class="nak-bar">
+      <span class="nak-icon">🌟</span>
+      <div>
+        <div class="nak-name">Ashlesha (8th)</div>
+        <div class="nak-desc">Serpent Nakshatra · Mercury</div>
+        <div style="font-size:0.72rem; color:var(--text-dim); margin-top:4px;">Ends 7:45 PM today</div>
+      </div>
+    </div>
+
+    <!-- Upcoming Festivals -->
+    <div class="section-title" style="margin-top:8px;">Upcoming Festivals</div>
+    <div class="festival-list">
+      <div class="festival-item">
+        <span class="festival-date">16<br><span style="font-size:0.55rem;">Feb</span></span>
+        <span class="festival-name">Pradosh Vrat</span>
+      </div>
+      <div class="festival-item">
+        <span class="festival-date">17<br><span style="font-size:0.55rem;">Feb</span></span>
+        <span class="festival-name">Maha Shivratri</span>
+      </div>
+      <div class="festival-item">
+        <span class="festival-date">18<br><span style="font-size:0.55rem;">Feb</span></span>
+        <span class="festival-name">Amavasya</span>
+      </div>
+      <div class="festival-item">
+        <span class="festival-date">23<br><span style="font-size:0.55rem;">Feb</span></span>
+        <span class="festival-name">Saptami Tithi</span>
+      </div>
+      <div class="festival-item">
+        <span class="festival-date">28<br><span style="font-size:0.55rem;">Feb</span></span>
+        <span class="festival-name">Holi Purnima</span>
+      </div>
+    </div>
+
+    <div class="ornate-divider"><span>✦</span></div>
+
+    <!-- Daily Shloka -->
+    <div class="section-title">Daily Shloka</div>
+    <div class="widget" style="text-align:center;">
+      <div style="font-size:1rem; color:var(--gold-light); line-height:1.8; font-style:italic; margin-bottom:8px;">
+        सर्वे भवन्तु सुखिनः।<br>
+        सर्वे सन्तु निरामयाः।
+      </div>
+      <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.6;">
+        May all beings be happy.<br>May all be free from illness.
+      </div>
+    </div>
+
+    <!-- Pancha Tattva -->
+    <div class="section-title" style="margin-top:8px;">Pancha Tattva Today</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px;">
+      <div class="panchang-item">
+        <span class="panchang-label">Element</span>
+        <span class="panchang-value" style="font-size:0.85rem;">🌍 Earth</span>
+      </div>
+      <div class="panchang-item">
+        <span class="panchang-label">Direction</span>
+        <span class="panchang-value" style="font-size:0.85rem;">↑ North</span>
+      </div>
+      <div class="panchang-item">
+        <span class="panchang-label">Color</span>
+        <span class="panchang-value" style="font-size:0.85rem;">🟡 Yellow</span>
+      </div>
+      <div class="panchang-item">
+        <span class="panchang-label">Deity</span>
+        <span class="panchang-value" style="font-size:0.85rem;">☀️ Surya</span>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="footer-mantra">ॐ सर्वे भवन्तु सुखिनः — ॐ शान्तिः शान्तिः शान्तिः</div>
+  <p>Sudarshan Raja Astro — Hindu Calendar & Vedic Astrology Portal · Data shown for Chennai, Tamil Nadu, India (IST)</p>
+  <p style="margin-top:4px;">Calculations based on Drik Siddhanta · For educational and spiritual purposes only</p>
+</footer>
+
+</div><!-- .wrapper -->
+
+<script>
+// ═══════════════════════════════════════════════
+// STARS CANVAS
+// ═══════════════════════════════════════════════
+(function initStars() {
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = [];
+    for (let i = 0; i < 200; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.3,
+        o: Math.random() * 0.8 + 0.2,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.02 + 0.005
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const t = Date.now() / 1000;
+    stars.forEach(s => {
+      const o = s.o * (0.6 + 0.4 * Math.sin(t * s.speed + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 245, 220, ${o})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  draw();
+  window.addEventListener('resize', resize);
+})();
+
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const ZODIAC = [
+  { name:'Aries',       rashi:'Mesha',      symbol:'♈', dates:'Mar 21–Apr 19', element:'fire',  lord:'Mars (Mangal)',    gem:'Ruby · Red Coral', color:'🔴 Red · Orange', compat:'Leo · Sagittarius', bestTime:'10 AM–1 PM', num:'3·9' },
+  { name:'Taurus',      rashi:'Vrishabha',  symbol:'♉', dates:'Apr 20–May 20', element:'earth', lord:'Venus (Shukra)',   gem:'Diamond · Opal',   color:'🟢 Green · White', compat:'Virgo · Capricorn', bestTime:'6 AM–9 AM', num:'2·6' },
+  { name:'Gemini',      rashi:'Mithuna',    symbol:'♊', dates:'May 21–Jun 20', element:'air',   lord:'Mercury (Budha)', gem:'Emerald · Pearl',  color:'🟡 Yellow · Green', compat:'Libra · Aquarius', bestTime:'9 AM–12 PM', num:'5·7' },
+  { name:'Cancer',      rashi:'Karka',      symbol:'♋', dates:'Jun 21–Jul 22', element:'water', lord:'Moon (Chandra)',  gem:'Pearl · Moonstone', color:'⚪ White · Silver', compat:'Scorpio · Pisces', bestTime:'7 PM–10 PM', num:'2·7' },
+  { name:'Leo',         rashi:'Simha',      symbol:'♌', dates:'Jul 23–Aug 22', element:'fire',  lord:'Sun (Surya)',     gem:'Ruby · Peridot',   color:'🟠 Gold · Orange', compat:'Aries · Sagittarius', bestTime:'12 PM–3 PM', num:'1·4' },
+  { name:'Virgo',       rashi:'Kanya',      symbol:'♍', dates:'Aug 23–Sep 22', element:'earth', lord:'Mercury (Budha)', gem:'Emerald · Sapphire', color:'🟤 Brown · Navy', compat:'Taurus · Capricorn', bestTime:'8 AM–11 AM', num:'5·14' },
+  { name:'Libra',       rashi:'Tula',       symbol:'♎', dates:'Sep 23–Oct 22', element:'air',   lord:'Venus (Shukra)', gem:'Diamond · Opal',   color:'🔵 Blue · Pink', compat:'Gemini · Aquarius', bestTime:'3 PM–6 PM', num:'6·15' },
+  { name:'Scorpio',     rashi:'Vrishchika', symbol:'♏', dates:'Oct 23–Nov 21', element:'water', lord:'Mars (Mangal)',  gem:'Red Coral · Bloodstone', color:'🔴 Maroon · Black', compat:'Cancer · Pisces', bestTime:'9 PM–12 AM', num:'9·18' },
+  { name:'Sagittarius', rashi:'Dhanu',      symbol:'♐', dates:'Nov 22–Dec 21', element:'fire',  lord:'Jupiter (Guru)', gem:'Yellow Sapphire',  color:'🟣 Purple · Violet', compat:'Aries · Leo', bestTime:'11 AM–2 PM', num:'3·12' },
+  { name:'Capricorn',   rashi:'Makara',     symbol:'♑', dates:'Dec 22–Jan 19', element:'earth', lord:'Saturn (Shani)', gem:'Blue Sapphire · Amethyst', color:'⚫ Black · Gray', compat:'Taurus · Virgo', bestTime:'10 AM–1 PM', num:'8·17' },
+  { name:'Aquarius',    rashi:'Kumbha',     symbol:'♒', dates:'Jan 20–Feb 18', element:'air',   lord:'Saturn (Shani)', gem:'Amethyst · Sapphire', color:'🔵 Electric Blue', compat:'Gemini · Libra', bestTime:'4 PM–7 PM', num:'4·8' },
+  { name:'Pisces',      rashi:'Meena',      symbol:'♓', dates:'Feb 19–Mar 20', element:'water', lord:'Jupiter (Guru)', gem:'Yellow Sapphire · Aquamarine', color:'🟢 Sea Green', compat:'Cancer · Scorpio', bestTime:'8 PM–11 PM', num:'3·7' },
+];
+
+const HOROSCOPES = {
+  today: [
+    "Mars energizes your drive today. A bold decision taken now will yield rewards within the fortnight. Creative pursuits find divine inspiration through Jupiter's benevolent gaze. Guard against impulsive spending — Saturn watches closely.",
+    "Venus bathes your sign in gentle light, making this an ideal day for romance and artistic endeavors. A financial opportunity presented by a colleague deserves careful consideration. The Moon in your second house hints at domestic harmony.",
+    "Mercury, your ruler, reaches peak strength today, sharpening your wit and eloquence. Communications flow effortlessly — ideal for negotiations, presentations, or heartfelt conversations. A twin-energied day calls for adaptability.",
+    "The lunar energies are deeply personal today, urging introspection over action. Family bonds are highlighted, and a long-forgotten memory surfaces bearing wisdom. Trust your intuition above analytical reasoning.",
+    "The Sun blazes with particular intensity in your arena today. Leadership opportunities arise naturally — seize them with characteristic confidence. Beware of ego clashes; generosity of spirit will open more doors than pride.",
+    "Your earth energy is perfectly attuned to practical tasks today. A project that has required meticulous attention finally reaches completion. Health matters benefit from your natural discipline — begin a new wellness routine.",
+    "Balance and harmony define your day as Venus supports your Libran nature. Artistic and social activities bring genuine joy. In partnerships, clear and gentle communication dissolves any lingering tension.",
+    "Pluto stirs the depths of your psyche, bringing transformation and revelation. What was hidden comes to light — and the truth, though startling, proves liberating. Your regenerative powers are at their zenith.",
+    "Jupiter's expansive wisdom flows through you today like a warm, golden river. Travel, learning, and philosophical discussions light your spirit. An unexpected teacher appears, offering insights that reshape your worldview.",
+    "Saturn, your cosmic taskmaster, rewards consistency and perseverance today. The slow, disciplined path you have walked bears fruit. A professional acknowledgment or financial gain is imminent.",
+    "Uranus sends electric inspiration through your consciousness, sparking innovative ideas that could revolutionize your approach to a long-standing challenge. Connect with like-minded visionaries — your network holds hidden treasure.",
+    "Neptune deepens your already profound intuition today, blurring boundaries between the material and the spiritual. Creative and spiritual pursuits yield transcendent experiences. Practice gentle discernment in new relationships.",
+  ],
+  tomorrow: [
+    "The dawn brings fresh opportunities as Jupiter casts a favorable aspect on your sector of ambitions. Rest well tonight to receive tomorrow's energies fully.",
+  ],
+  week: [
+    "This week carries the theme of renewal and purposeful action. Planetary configurations suggest midweek holds the greatest promise for professional breakthroughs.",
+  ],
+  month: [
+    "February 2026 unfolds as a month of significant inner shifts. The Magha lunar month amplifies ancestral connections and karmic resolution.",
+  ],
+  year: [
+    "The year 2026 initiates a remarkable cycle of growth. Saturn's transit brings structure to your dreams, while Jupiter expands your horizons beyond familiar boundaries.",
+  ],
+};
+
+const PLANETS = [
+  { icon:'☀️', name:'Sun (Surya)',      rashi:'Capricorn (Makara)', deg:'2° 15\'', nak:'Uttara Ashadha', status:'Direct',    effect:'Authority, Government' },
+  { icon:'🌙', name:'Moon (Chandra)',   rashi:'Cancer (Karka)',     deg:'18° 42\'', nak:'Ashlesha',       status:'Direct',    effect:'Mind, Emotions, Home' },
+  { icon:'⬤', name:'Mars (Mangal)',    rashi:'Gemini (Mithuna)',   deg:'11° 30\'', nak:'Ardra',          status:'Direct',    effect:'Courage, Energy, Conflict' },
+  { icon:'☿', name:'Mercury (Budha)',  rashi:'Capricorn (Makara)', deg:'28° 05\'', nak:'Dhanishtha',     status:'Retrograde', effect:'Communication, Trade' },
+  { icon:'♃', name:'Jupiter (Guru)',   rashi:'Gemini (Mithuna)',   deg:'17° 22\'', nak:'Ardra',          status:'Direct',    effect:'Wisdom, Expansion, Grace' },
+  { icon:'♀', name:'Venus (Shukra)',   rashi:'Aquarius (Kumbha)',  deg:'5° 48\'',  nak:'Shatabhisha',    status:'Direct',    effect:'Love, Beauty, Luxury' },
+  { icon:'♄', name:'Saturn (Shani)',   rashi:'Pisces (Meena)',     deg:'22° 14\'', nak:'Revati',         status:'Direct',    effect:'Karma, Discipline, Delay' },
+  { icon:'☊', name:'Rahu (N. Node)',   rashi:'Aquarius (Kumbha)',  deg:'11° 17\'', nak:'Shatabhisha',    status:'Retrograde', effect:'Ambition, Foreign, Illusion' },
+  { icon:'☋', name:'Ketu (S. Node)',   rashi:'Leo (Simha)',        deg:'11° 17\'', nak:'Purva Phalguni', status:'Retrograde', effect:'Spirituality, Liberation' },
+];
+
+const MUHURTA_DATA = [
+  { name:'Abhijit Muhurta',      time:'11:52 AM – 12:38 PM', type:'good', badge:'Excellent', desc:'Best for all auspicious activities' },
+  { name:'Brahma Muhurta',       time:'4:46 AM – 5:35 AM',   type:'good', badge:'Auspicious', desc:'Ideal for meditation and spiritual practice' },
+  { name:'Godhuli Lagna',        time:'6:04 PM – 6:14 PM',   type:'good', badge:'Auspicious', desc:'Favorable for marriage and new beginnings' },
+  { name:'Vijaya Muhurta',       time:'2:08 PM – 2:54 PM',   type:'good', badge:'Good', desc:'Favorable for competition and travel' },
+  { name:'Amrit Kaal',           time:'6:30 AM – 8:06 AM',   type:'good', badge:'Amrit', desc:'Nectar period — powerful for all work' },
+  { name:'Rahu Kaal',            time:'4:48 PM – 6:09 PM',   type:'bad',  badge:'Inauspicious', desc:'Avoid starting new ventures' },
+  { name:'Yamaganda',            time:'12:21 PM – 1:43 PM',  type:'bad',  badge:'Avoid', desc:'Unfavorable period governed by Yama' },
+  { name:'Gulika Kaal',          time:'1:43 PM – 3:05 PM',   type:'bad',  badge:'Avoid', desc:'Period of Saturn — avoid important tasks' },
+  { name:'Dur Muhurta (Morning)','time':'8:22 AM – 9:08 AM', type:'bad',  badge:'Inauspicious', desc:'Avoid auspicious activities' },
+  { name:'Dur Muhurta (Evening)','time':'4:27 PM – 5:13 PM', type:'bad',  badge:'Inauspicious', desc:'Inauspicious — best to wait' },
+  { name:'Varjyam',              time:'3:15 PM – 4:51 PM',   type:'neutral', badge:'Caution', desc:'Neutral — proceed with care' },
+  { name:'Pratah Sandhya',       time:'6:00 AM – 6:30 AM',   type:'neutral', badge:'Neutral', desc:'Dawn twilight — moderate period' },
+];
+
+const FESTIVALS_FEB = [
+  { date:'Feb 15', name:'Pradosh Vrat · Dwadashi', icon:'🪔' },
+  { date:'Feb 16', name:'Trayodashi — Auspicious', icon:'⭐' },
+  { date:'Feb 17', name:'Maha Shivratri', icon:'🕉️' },
+  { date:'Feb 18', name:'Amavasya (New Moon)', icon:'🌑' },
+  { date:'Feb 19', name:'Pratipada — Shukla Paksha begins', icon:'🌒' },
+  { date:'Feb 21', name:'Ganesh Chaturthi Vrat', icon:'🐘' },
+  { date:'Feb 23', name:'Vasant Panchami', icon:'🌸' },
+  { date:'Feb 25', name:'Saptami Tithi · Surya Saptami', icon:'☀️' },
+  { date:'Feb 26', name:'Bhishma Ashtami', icon:'🏹' },
+  { date:'Feb 28', name:'Holi — Phalguna Purnima', icon:'🎨' },
+];
+
+const HORA_DATA = [
+  { time:'6:25–7:25 AM',   planet:'Sun',     good:'Government work, Leadership', avoid:'Borrowing' },
+  { time:'7:25–8:25 AM',   planet:'Venus',   good:'Arts, Romance, Beauty', avoid:'Conflicts' },
+  { time:'8:25–9:25 AM',   planet:'Mercury', good:'Trade, Study, Communication', avoid:'Hasty decisions' },
+  { time:'9:25–10:25 AM',  planet:'Moon',    good:'Farming, Domestic work', avoid:'Starting journeys' },
+  { time:'10:25–11:25 AM', planet:'Saturn',  good:'Hard labor, Discipline', avoid:'New ventures' },
+  { time:'11:25–12:25 PM', planet:'Jupiter', good:'Wisdom, Teaching, Finance', avoid:'Nothing major' },
+  { time:'12:25–1:25 PM',  planet:'Mars',    good:'Surgery, Courage, Sports', avoid:'Peaceful negotiation' },
+  { time:'1:25–2:25 PM',   planet:'Sun',     good:'Authority, Administration', avoid:'Speculation' },
+  { time:'2:25–3:25 PM',   planet:'Venus',   good:'Pleasure, Creative arts', avoid:'Legal disputes' },
+  { time:'3:25–4:25 PM',   planet:'Mercury', good:'Learning, Writing, Commerce', avoid:'Emotional decisions' },
+  { time:'4:25–5:25 PM',   planet:'Moon',    good:'Water activities, Imagination', avoid:'Critical tasks' },
+  { time:'5:25–6:09 PM',   planet:'Saturn',  good:'Endings, Completion', avoid:'New beginnings' },
+];
+
+const HORA_PLANETS = { Sun:'☀️', Venus:'♀', Mercury:'☿', Moon:'🌙', Saturn:'♄', Jupiter:'♃', Mars:'⬤' };
+
+const NAKSHATRAS = [
+  {num:1,  name:'Ashwini',         lord:'Ketu',    symbol:'Horse head', deity:'Ashwini Kumaras'},
+  {num:2,  name:'Bharani',         lord:'Venus',   symbol:'Yoni',       deity:'Yama'},
+  {num:3,  name:'Krittika',        lord:'Sun',     symbol:'Razor',      deity:'Agni'},
+  {num:4,  name:'Rohini',          lord:'Moon',    symbol:'Chariot',    deity:'Brahma'},
+  {num:5,  name:'Mrigashira',      lord:'Mars',    symbol:'Deer head',  deity:'Soma'},
+  {num:6,  name:'Ardra',           lord:'Rahu',    symbol:'Teardrop',   deity:'Rudra'},
+  {num:7,  name:'Punarvasu',       lord:'Jupiter', symbol:'Quiver',     deity:'Aditi'},
+  {num:8,  name:'Pushya',          lord:'Saturn',  symbol:'Lotus',      deity:'Brihaspati'},
+  {num:9,  name:'Ashlesha',        lord:'Mercury', symbol:'Serpent',    deity:'Nagas', current:true},
+  {num:10, name:'Magha',           lord:'Ketu',    symbol:'Throne',     deity:'Pitrs'},
+  {num:11, name:'Purva Phalguni',  lord:'Venus',   symbol:'Hammock',    deity:'Bhaga'},
+  {num:12, name:'Uttara Phalguni', lord:'Sun',     symbol:'Fig tree',   deity:'Aryaman'},
+  {num:13, name:'Hasta',           lord:'Moon',    symbol:'Hand',       deity:'Savitar'},
+  {num:14, name:'Chitra',          lord:'Mars',    symbol:'Pearl',      deity:'Tvastar'},
+  {num:15, name:'Swati',           lord:'Rahu',    symbol:'Coral',      deity:'Vayu'},
+  {num:16, name:'Vishakha',        lord:'Jupiter', symbol:'Arch',       deity:'Indra-Agni'},
+  {num:17, name:'Anuradha',        lord:'Saturn',  symbol:'Lotus',      deity:'Mitra'},
+  {num:18, name:'Jyeshtha',        lord:'Mercury', symbol:'Talisman',   deity:'Indra'},
+  {num:19, name:'Mula',            lord:'Ketu',    symbol:'Roots',      deity:'Niritti'},
+  {num:20, name:'Purva Ashadha',   lord:'Venus',   symbol:'Elephant tusk', deity:'Apas'},
+  {num:21, name:'Uttara Ashadha',  lord:'Sun',     symbol:'Elephant tusk', deity:'Vishvadevas'},
+  {num:22, name:'Shravana',        lord:'Moon',    symbol:'Ear / Arrow', deity:'Vishnu'},
+  {num:23, name:'Dhanishtha',      lord:'Mars',    symbol:'Drum',       deity:'Ashta Vasus'},
+  {num:24, name:'Shatabhisha',     lord:'Rahu',    symbol:'100 stars',  deity:'Varuna'},
+  {num:25, name:'Purva Bhadrapada',lord:'Jupiter', symbol:'Sword',      deity:'Ajaikapat'},
+  {num:26, name:'Uttara Bhadrapada',lord:'Saturn', symbol:'Twins',      deity:'Ahirbudhanya'},
+  {num:27, name:'Revati',          lord:'Mercury', symbol:'Fish',       deity:'Pushan'},
+];
+
+const CHOGHADIYA = [
+  { name:'Udveg',  quality:'bad',     color:'rgba(120,30,30,0.4)',   text:'#f08080' },
+  { name:'Char',   quality:'neutral', color:'rgba(50,80,160,0.4)',   text:'#90b0f0' },
+  { name:'Labh',   quality:'good',    color:'rgba(30,100,60,0.4)',   text:'#60e0a0' },
+  { name:'Amrit',  quality:'best',    color:'rgba(140,110,20,0.4)',  text:'#f0d050' },
+  { name:'Kaal',   quality:'bad',     color:'rgba(80,0,80,0.4)',     text:'#d080d0' },
+  { name:'Shubh',  quality:'good',    color:'rgba(30,100,60,0.4)',   text:'#60e0a0' },
+  { name:'Rog',    quality:'bad',     color:'rgba(120,30,30,0.4)',   text:'#f08080' },
+  { name:'Char',   quality:'neutral', color:'rgba(50,80,160,0.4)',   text:'#90b0f0' },
+];
+
+// Sunday day Choghadiya sequence
+const DAY_CHOGHADIYA = ['Udveg','Char','Labh','Amrit','Kaal','Shubh','Rog','Char'];
+const NIGHT_CHOGHADIYA = ['Shubh','Amrit','Char','Rog','Kaal','Labh','Udveg','Char'];
+
+// ═══════════════════════════════════════════════
+// INIT DATE
+// ═══════════════════════════════════════════════
+const TODAY = new Date(2026, 1, 15); // Feb 15, 2026
+
+function initDate() {
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const day = days[TODAY.getDay()];
+  const d = TODAY.getDate();
+  const m = months[TODAY.getMonth()];
+  const y = TODAY.getFullYear();
+
+  document.getElementById('english-date-header').textContent = `${day}, ${m} ${d}, ${y}`;
+  document.getElementById('full-date-display').textContent = `${day}, ${m} ${d}, ${y} · Chennai, Tamil Nadu`;
+}
+
+// ═══════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════
+let calMonth = 1, calYear = 2026; // Feb = 1
+
+const festDays = [15,16,17,18,21,23,25,26,28];
+
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = `${months[calMonth]} ${calYear}`;
+
+  const grid = document.getElementById('calendar-grid');
+  // Remove day cells (keep headers)
+  const headers = grid.querySelectorAll('.cal-day-header');
+  grid.innerHTML = '';
+  headers.forEach(h => grid.appendChild(h));
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+
+  // Prev month
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.textContent = prevDays - i;
+    grid.appendChild(d);
+  }
+
+  // Current month
+  for (let i = 1; i <= daysInMonth; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day';
+    d.textContent = i;
+
+    if (i === 15 && calMonth === 1 && calYear === 2026) {
+      d.classList.add('today');
+    }
+    if (festDays.includes(i) && calMonth === 1 && calYear === 2026) {
+      d.classList.add('festival');
+    }
+    grid.appendChild(d);
+  }
+
+  // Next month
+  const total = firstDay + daysInMonth;
+  const remainder = 7 - (total % 7 === 0 ? 7 : total % 7);
+  for (let i = 1; i <= remainder; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.textContent = i;
+    grid.appendChild(d);
+  }
+}
+
+function changeMonth(delta) {
+  calMonth += delta;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+// ═══════════════════════════════════════════════
+// ZODIAC GRID
+// ═══════════════════════════════════════════════
+let selectedZodiac = 0;
+let currentPeriod = 'today';
+
+function renderZodiacGrid() {
+  const grid = document.getElementById('zodiac-grid');
+  grid.innerHTML = ZODIAC.map((z, i) => `
+    <div class="zodiac-card ${i === selectedZodiac ? 'selected' : ''}" onclick="selectZodiac(${i})">
+      <span class="zodiac-symbol">${z.symbol}</span>
+      <div class="zodiac-name">${z.name}</div>
+      <div class="zodiac-dates">${z.dates}</div>
+      <span class="zodiac-element ${z.element}">${z.element.toUpperCase()}</span>
+    </div>
+  `).join('');
+}
+
+function selectZodiac(idx) {
+  selectedZodiac = idx;
+  renderZodiacGrid();
+  renderHoroscopeDetail();
+}
+
+function setPeriod(period, btn) {
+  currentPeriod = period;
+  document.querySelectorAll('#period-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHoroscopeDetail();
+}
+
+const SCORES = [
+  [8,7,6],[7,8,7],[9,7,8],[6,8,7],[8,9,7],[7,8,9],[9,7,8],[7,6,9],[8,9,7],[7,8,8],[8,7,9],[9,8,7]
+];
+
+function renderHoroscopeDetail() {
+  const z = ZODIAC[selectedZodiac];
+  const s = SCORES[selectedZodiac];
+
+  document.getElementById('detail-symbol').textContent = z.symbol;
+  document.getElementById('detail-name').textContent = z.name;
+  document.getElementById('detail-rashi').textContent = `${z.rashi.toUpperCase()} RASHI · ${z.element.toUpperCase()} SIGN · RULED BY ${z.lord.toUpperCase()}`;
+  document.getElementById('detail-dates').textContent = z.dates;
+
+  const scoreColors = [
+    ['rgba(220,80,120,0.5)','#f090c0'],
+    ['rgba(200,150,62,0.5)','#e8b96a'],
+    ['rgba(80,200,120,0.5)','#80f0a0']
+  ];
+
+  ['love','career','health'].forEach((id, i) => {
+    const ring = document.getElementById(`score-${id}`);
+    ring.textContent = s[i];
+    ring.style.borderColor = scoreColors[i][0];
+    ring.style.color = scoreColors[i][1];
+  });
+
+  const period = currentPeriod;
+  const horoArr = HOROSCOPES[period] || HOROSCOPES.today;
+  const text = horoArr[selectedZodiac] || horoArr[0];
+
+  document.getElementById('horoscope-text').innerHTML = `<p>${text}</p>`;
+  document.getElementById('lucky-num').textContent = z.num;
+  document.getElementById('lucky-color').textContent = z.color;
+  document.getElementById('lucky-gem').textContent = z.gem;
+  document.getElementById('lucky-compat').textContent = z.compat;
+  document.getElementById('lucky-time').textContent = z.bestTime;
+}
+
+// ═══════════════════════════════════════════════
+// PLANETS TABLE
+// ═══════════════════════════════════════════════
+function renderPlanets() {
+  const tbody = document.getElementById('planet-tbody');
+  tbody.innerHTML = PLANETS.map(p => `
+    <tr>
+      <td><span class="planet-icon">${p.icon}</span><span class="planet-name">${p.name}</span></td>
+      <td class="planet-rashi">${p.rashi}</td>
+      <td style="color:var(--text-muted); font-family:'Cinzel',serif; font-size:0.78rem;">${p.deg}</td>
+      <td style="color:var(--text-light);">${p.nak}</td>
+      <td>${p.status === 'Retrograde'
+        ? '<span class="planet-retro">Retro ℞</span>'
+        : '<span style="color:#80f0a0; font-size:0.75rem;">Direct ▶</span>'}</td>
+      <td style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">${p.effect}</td>
+    </tr>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// MUHURTA
+// ═══════════════════════════════════════════════
+function renderMuhurta() {
+  const list = document.getElementById('muhurta-list');
+  list.innerHTML = MUHURTA_DATA.map(m => `
+    <div class="muhurta-item ${m.type}">
+      <div>
+        <div class="muhurta-name">${m.name}</div>
+        <div style="font-size:0.73rem; color:var(--text-dim); margin-top:2px; font-style:italic;">${m.desc}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="muhurta-time">${m.time}</div>
+        <span class="muhurta-badge ${m.type}">${m.badge}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// FESTIVALS
+// ═══════════════════════════════════════════════
+function renderFestivals() {
+  const list = document.getElementById('festival-list');
+  list.innerHTML = FESTIVALS_FEB.map(f => `
+    <div class="festival-item">
+      <span style="font-size:1.4rem;">${f.icon}</span>
+      <div>
+        <div style="font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.1em; color:var(--gold); margin-bottom:2px;">${f.date}</div>
+        <div style="color:var(--text-light);">${f.name}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// HORA
+// ═══════════════════════════════════════════════
+function renderHora() {
+  const now = new Date();
+  const hour = now.getHours();
+  const tbody = document.getElementById('hora-tbody');
+  tbody.innerHTML = HORA_DATA.map((h, i) => {
+    const startHr = 6 + i;
+    const isCurrent = (hour >= startHr && hour < startHr + 1);
+    return `
+      <tr class="${isCurrent ? 'current-hora' : ''}">
+        <td style="font-family:'Cinzel',serif; font-size:0.75rem; white-space:nowrap;">${h.time}${isCurrent ? ' ← Now' : ''}</td>
+        <td><span style="font-size:1rem; margin-right:6px;">${HORA_PLANETS[h.planet] || ''}</span><span style="font-family:'Cinzel',serif; font-size:0.78rem;">${h.planet}</span></td>
+        <td style="color:#80f0a0; font-size:0.8rem;">${h.good}</td>
+        <td style="color:#f08080; font-size:0.8rem;">${h.avoid}</td>
+      </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// NAKSHATRA
+// ═══════════════════════════════════════════════
+function renderNakshatra() {
+  // Today's nakshatra detail
+  const today = NAKSHATRAS.find(n => n.current);
+  document.getElementById('nakshatra-today').innerHTML = `
+    <div style="background:linear-gradient(135deg,rgba(30,37,80,0.8),rgba(11,16,48,0.8)); border:1px solid rgba(200,150,62,0.4); border-radius:6px; padding:18px;">
+      <div style="font-family:'Cinzel Decorative',serif; font-size:1.1rem; color:var(--gold); margin-bottom:8px;">🌟 Today: ${today.name} (${today.num}th Nakshatra)</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:10px;">
+        <div class="panchang-item"><span class="panchang-label">Lord Planet</span><span class="panchang-value">${today.lord}</span></div>
+        <div class="panchang-item"><span class="panchang-label">Symbol</span><span class="panchang-value">${today.symbol}</span></div>
+        <div class="panchang-item"><span class="panchang-label">Deity</span><span class="panchang-value">${today.deity}</span></div>
+      </div>
+      <div style="margin-top:12px; font-size:0.85rem; color:var(--text-muted); font-style:italic;">Ashlesha nakshatra bestows penetrating intelligence and mystical perception. Its serpentine energy brings transformation, healing arts, and mastery of hidden knowledge.</div>
+    </div>
+  `;
+
+  const allDiv = document.getElementById('all-nakshatras');
+  allDiv.innerHTML = NAKSHATRAS.map(n => `
+    <div style="padding:8px; border:1px solid ${n.current ? 'rgba(200,150,62,0.5)' : 'rgba(200,150,62,0.15)'}; border-radius:3px; background:${n.current ? 'rgba(30,37,80,0.8)' : 'rgba(11,16,48,0.4)'};">
+      <div style="font-family:'Cinzel',serif; font-size:0.68rem; color:${n.current ? 'var(--gold)' : 'var(--gold-light)'};">${n.num}. ${n.name} ${n.current ? '★' : ''}</div>
+      <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${n.lord} · ${n.symbol}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// CHOGHADIYA
+// ═══════════════════════════════════════════════
+function renderChoghadiya() {
+  // Sunrise 6:25, Sunset 6:09 PM → day = ~11h 44m = 704 min / 8 = ~88 min per period
+  const sunrise = 6 * 60 + 25;
+  const sunset  = 18 * 60 + 9;
+  const dayMin  = sunset - sunrise;
+  const dayPer  = dayMin / 8;
+  const nightPer = (24 * 60 - dayMin) / 8;
+
+  function minToTime(m) {
+    const hh = Math.floor(m / 60) % 24;
+    const mm = Math.round(m % 60);
+    const ampm = hh >= 12 ? 'PM' : 'AM';
+    const h = hh % 12 || 12;
+    return `${h}:${mm.toString().padStart(2,'0')} ${ampm}`;
+  }
+
+  const choghaQuality = { Amrit:'best', Shubh:'good', Labh:'good', Char:'neutral', Udveg:'bad', Rog:'bad', Kaal:'bad' };
+
+  function makeChog(seq, startMin, perMin) {
+    return seq.map((name, i) => {
+      const from = startMin + i * perMin;
+      const to = from + perMin;
+      const q = choghaQuality[name] || 'neutral';
+      const colors = { best:'rgba(140,110,20,0.4)', good:'rgba(30,100,60,0.4)', neutral:'rgba(50,80,160,0.35)', bad:'rgba(100,20,20,0.4)' };
+      const textc = { best:'#f0d050', good:'#60e0a0', neutral:'#90b0f0', bad:'#f09090' };
+      return `<div style="padding:8px; border-radius:3px; background:${colors[q]}; border:1px solid ${textc[q].replace(')',',0.3)')};">
+        <div style="font-family:'Cinzel',serif; font-size:0.72rem; color:${textc[q]};">${name}</div>
+        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;">${minToTime(from)}–${minToTime(to)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('choghadiya-day-content').innerHTML   = makeChog(DAY_CHOGHADIYA,   sunrise, dayPer);
+  document.getElementById('choghadiya-night-content').innerHTML = makeChog(NIGHT_CHOGHADIYA, sunset,  nightPer);
+}
+
+// ═══════════════════════════════════════════════
+// KUNDLI
+// ═══════════════════════════════════════════════
+function generateKundli() {
+  const dob = document.getElementById('kundli-dob').value;
+  const tob = document.getElementById('kundli-tob').value;
+  const pob = document.getElementById('kundli-pob').value;
+
+  if (!dob || !tob || !pob) {
+    alert('Please fill in Date of Birth, Time of Birth, and Place of Birth.');
+    return;
+  }
+
+  document.getElementById('kundli-chart').style.display = 'block';
+  drawKundliChart();
+
+  const dateObj = new Date(dob + 'T' + tob);
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  document.getElementById('kundli-details').innerHTML = `
+    <div class="section-title">Chart Details</div>
+    <div class="panchang-card">
+      <div class="panchang-grid">
+        <div class="panchang-item"><span class="panchang-label">Date of Birth</span><span class="panchang-value" style="font-size:0.85rem;">${monthNames[dateObj.getMonth()]} ${dateObj.getDate()}, ${dateObj.getFullYear()}</span></div>
+        <div class="panchang-item"><span class="panchang-label">Time of Birth</span><span class="panchang-value" style="font-size:0.85rem;">${tob}</span></div>
+        <div class="panchang-item"><span class="panchang-label">Place of Birth</span><span class="panchang-value" style="font-size:0.85rem;">${pob}</span></div>
+        <div class="panchang-item"><span class="panchang-label">Day</span><span class="panchang-value" style="font-size:0.85rem;">${dayNames[dateObj.getDay()]}</span></div>
+        <div class="panchang-item"><span class="panchang-label">Lagna</span><span class="panchang-value" style="font-size:0.85rem;">Mithuna (Gemini)</span></div>
+        <div class="panchang-item"><span class="panchang-label">Rashi</span><span class="panchang-value" style="font-size:0.85rem;">Karka (Cancer)</span></div>
+        <div class="panchang-item"><span class="panchang-label">Nakshatra</span><span class="panchang-value" style="font-size:0.85rem;">Pushya</span></div>
+        <div class="panchang-item"><span class="panchang-label">Tithi</span><span class="panchang-value" style="font-size:0.85rem;">Dashami</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function drawKundliChart() {
+  const canvas = document.getElementById('kundli-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 400, H = 400;
+
+  ctx.fillStyle = 'rgba(11,16,48,0.9)';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = '#c8963e';
+  ctx.lineWidth = 1.5;
+
+  // Outer square
+  ctx.strokeRect(10, 10, W-20, H-20);
+
+  // Inner square (rotated diamond)
+  const cx = W/2, cy = H/2;
+  const half = (W-20)/2;
+  ctx.beginPath();
+  ctx.moveTo(cx, 10);
+  ctx.lineTo(W-10, cy);
+  ctx.lineTo(cx, H-10);
+  ctx.lineTo(10, cy);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Diagonals
+  ctx.beginPath();
+  ctx.moveTo(10, 10);
+  ctx.lineTo(W-10, H-10);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(W-10, 10);
+  ctx.lineTo(10, H-10);
+  ctx.stroke();
+
+  // Houses (12 bhavas)
+  const houses = [
+    {x:cx, y:30, label:'1', planet:'☿ ☀', color:'#f0d050'},
+    {x:W-30, y:30+30, label:'2', planet:'', color:'#c8963e'},
+    {x:W-30, y:cy-40, label:'3', planet:'♀', color:'#c8963e'},
+    {x:W-40, y:cy, label:'4', planet:'', color:'#c8963e'},
+    {x:W-30, y:cy+40, label:'5', planet:'♃', color:'#c8963e'},
+    {x:W-30, y:H-60, label:'6', planet:'', color:'#c8963e'},
+    {x:cx, y:H-30, label:'7', planet:'', color:'#c8963e'},
+    {x:30, y:H-60, label:'8', planet:'☊', color:'#c8963e'},
+    {x:30, y:cy+40, label:'9', planet:'♄', color:'#c8963e'},
+    {x:40, y:cy, label:'10', planet:'', color:'#c8963e'},
+    {x:30, y:cy-40, label:'11', planet:'⬤', color:'#c8963e'},
+    {x:30, y:30+30, label:'12', planet:'🌙', color:'#c8963e'},
+  ];
+
+  houses.forEach(h => {
+    ctx.fillStyle = h.color;
+    ctx.font = 'bold 10px Cinzel, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(h.label, h.x, h.y);
+    if (h.planet) {
+      ctx.fillStyle = '#e8d8a0';
+      ctx.font = '11px serif';
+      ctx.fillText(h.planet, h.x, h.y + 14);
+    }
+  });
+
+  // Center label
+  ctx.fillStyle = '#c8963e';
+  ctx.font = '12px Cinzel, serif';
+  ctx.fillText('Lagna Kundli', cx, cy - 8);
+  ctx.font = '10px serif';
+  ctx.fillStyle = '#a89878';
+  ctx.fillText('Mithuna Lagna', cx, cy + 10);
+}
+
+// ═══════════════════════════════════════════════
+// TAB SYSTEM
+// ═══════════════════════════════════════════════
+function showTab(name, link) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+
+  document.getElementById('tab-' + name).classList.add('active');
+  if (link) link.classList.add('active');
+
+  if (name === 'horoscope') renderZodiacGrid(), renderHoroscopeDetail();
+  if (name === 'planets')   renderPlanets();
+  if (name === 'festivals') renderFestivals();
+  if (name === 'nakshatra') renderNakshatra();
+  if (name === 'hora')      renderHora();
+  if (name === 'muhurta')   renderMuhurta();
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+(function init() {
+  initDate();
+  renderCalendar();
+  renderChoghadiya();
+})();
+</script>
+</body>
+</html>
